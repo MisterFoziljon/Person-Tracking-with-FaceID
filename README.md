@@ -1,7 +1,7 @@
 # Person-Tracking-with-FaceID
 
 Requirements:
-``` shell
+``` terminal
 pip install opencv-python
 pip install torchvision==0.14.1
 pip install onnxruntime
@@ -17,4 +17,14 @@ pip install tabulate
 pip install tensorboard
 pip install shapely
 pip install numpy==1.23.1
+```
+
+Usage:
+``` python
+from INOUT import INOUT
+
+action = INOUT()
+
+action.IN("sources/in.mp4") # in checker
+# action.OUT("sources/out.mp4") # out checker
 ```
