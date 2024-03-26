@@ -285,11 +285,3 @@ class INOUT:
             ch = cv2.waitKey(1)
             if ch == 27 or ch == ord("q") or ch == ord("Q"):
                 break
-                
-def main():
-    action = INOUT()
-    action.IN("sources/in.mp4")
-    
-
-if __name__ == "__main__":
-    main()
