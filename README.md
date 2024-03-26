@@ -2,6 +2,11 @@
 
 ### Requirements:
 ``` terminal
+conda create --name env python=3.9
+conda activate env
+```
+
+``` terminal
 pip install opencv-python
 pip install torchvision==0.14.1
 pip install onnxruntime
