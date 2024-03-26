@@ -1,6 +1,6 @@
 # Person-Tracking-with-FaceID
 
-Requirements:
+### Requirements:
 ``` terminal
 pip install opencv-python
 pip install torchvision==0.14.1
@@ -19,7 +19,7 @@ pip install shapely
 pip install numpy==1.23.1
 ```
 
-Usage:
+### Usage:
 ``` python
 from INOUT import INOUT
 
