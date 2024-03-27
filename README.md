@@ -21,6 +21,7 @@ pip install scikit-learn
 pip install tabulate
 pip install tensorboard
 pip install shapely
+pip install faiss-cpu
 pip install numpy==1.23.1
 ```
 
