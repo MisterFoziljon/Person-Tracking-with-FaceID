@@ -27,10 +27,25 @@ pip install numpy==1.23.1
 
 ### Usage:
 ``` python
-from INOUT import INOUT
+python IN.py
+# python OUT.py 
+```
 
-action = INOUT()
+### Parallel Usage:
+```
+import threading
+import subprocess
 
-action.IN("sources/in.mp4") # in checker
-# action.OUT("sources/out.mp4") # out checker
+def run_script(script_name):
+    subprocess.run(["python", script_name])
+
+if __name__ == "__main__":
+    script1_thread = threading.Thread(target=run_script, args=("IN.py",))
+    script2_thread = threading.Thread(target=run_script, args=("OUT.py",))
+
+    script1_thread.start()
+    script2_thread.start()
+
+    script1_thread.join()
+    script2_thread.join()
 ```
