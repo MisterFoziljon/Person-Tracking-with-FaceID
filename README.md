@@ -32,7 +32,7 @@ python IN.py
 ```
 
 ### Parallel Usage:
-```
+```python
 import threading
 import subprocess
 
