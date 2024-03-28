@@ -1,0 +1,16 @@
+opencv-python
+torchvision==0.14.1
+onnxruntime
+onnx
+ultralytics
+scikit-image
+lap
+numpy==1.23.1
+cython_bbox
+yacs
+termcolor
+scikit-learn
+tabulate
+tensorboard
+shapely
+faiss-cpu
