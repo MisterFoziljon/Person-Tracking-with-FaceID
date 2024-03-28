@@ -76,17 +76,16 @@ class INOUT:
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
         FACEID = defaultdict(str)
-        out = cv2.VideoWriter('result.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 10, (width,height))
         fps = cap.get(cv2.CAP_PROP_FPS)
 
         TRACKER = BoTSORT(frame_rate=fps)
-
+        count, FPSs= 0,0
         while cap.isOpened():
             start = time.time()
             ret, frame = cap.read()
             if not ret:
                 break
-
+            count+=1
             results = self.MODEL.predict(frame, conf=0.5, stream = False, device = torch.device("cpu"), verbose=False, classes=[0])
 
             xyxy=results[0].boxes.xyxy.cpu().numpy()
@@ -170,14 +169,13 @@ class INOUT:
             cv2.polylines(frame, [self.OUT_RECTANGLE], True, (0,255,255), thickness=5)
             end = time.time()
             cv2.putText(frame, f"FPS: {1./(end-start)}", (60,60), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), thickness=2)
-            
+            FPSs+=1./(end-start)
             frame = cv2.resize(frame,(width//3,height//3),interpolation = cv2.INTER_AREA)
             cv2.imshow("video",frame)
-            out.write(frame)    
             ch = cv2.waitKey(1)
             if ch == 27 or ch == ord("q") or ch == ord("Q"):
                 break
-
+        print(FPSs/count)
 if __name__=="__main__":
     action = INOUT()
     action.OUT("sources/out.mp4")
