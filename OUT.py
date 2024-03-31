@@ -19,29 +19,37 @@ from vision import BoxAnnotator
 from vision import ColorPalette
 from vision import LineCounterAnnotator
 
+from config import parse_args
 onnxruntime.set_default_logger_severity(3)
 
-class INOUT:
-    def __init__(self):
-        self.DETECTOR = SCRFD("/home/foziljon/PROJECTS/ATTENDENCE_SYSTEM/models/det_500m.onnx")
-        self.DETECTOR.prepare(-1)
-        self.RECOGNITION = ArcFaceONNX("/home/foziljon/PROJECTS/ATTENDENCE_SYSTEM/models/w600k_mbf.onnx")
-        self.RECOGNITION.prepare(-1)
+class OUT:
+    def __init__(self, FLAGS):
+        self.DETECTOR = SCRFD(FLAGS.face_detector)
+        self.RECOGNITION = ArcFaceONNX(FLAGS.face_recognizer)
+        self.DEVICE = None
         
-        self.MODEL = YOLO("/home/foziljon/PROJECTS/ATTENDENCE_SYSTEM/models/yolov8n.pt")
+        if FLAGS.use_cpu:
+            self.DETECTOR.prepare(-1)
+            self.RECOGNITION.prepare(-1)
+            self.DEVICE = torch.device("cpu")
+
+        else:
+            self.DETECTOR.prepare(1)
+            self.RECOGNITION.prepare(1)
+            self.DEVICE = torch.device("cuda")
+            
+        self.MODEL = YOLO(FLAGS.person_detector)
         self.MODEL.fuse()
         
-        self.DATABASE = self.database_loader('/home/foziljon/PROJECTS/ATTENDENCE_SYSTEM/dataset')
+        self.DATABASE = self.database_loader(FLAGS.database_folder)
         self.BOX_ANNOTATOR = BoxAnnotator(color=ColorPalette(), thickness=4, text_thickness=4, text_scale=2)
         self.LINE_ANNOTATOR = LineCounterAnnotator(thickness=4, text_thickness=4, text_scale=2)
-        self.IN_LINE_COUNTER = LineCounter(start=Point(910,700), end=Point(2240,700))
-        self.OUT_LINE_COUNTER = LineCounter(start=Point(2880,890), end=Point(2340,1630))
-        
-        self.POLYGON = Polygon([(770,890),(1610,530),(3270,1010),(2790,1860)])
-        
+        self.OUT_LINE_COUNTER = LineCounter(start=FLAGS.out_line_xy_min, end=FLAGS.out_line_xy_max)
         self.OUT_RECTANGLE = np.array([[[770,890],[1610,530],[3270,1010],[2790,1860]]])
-        self.IN_RECTANGLE = np.array([[[910,0],[2240,0],[2240,1400],[910,1400]]])
-
+        self.POLYGON = FLAGS.polygon
+        self.face_thresh = FLAGS.face_threshold
+        self.person_thresh = FLAGS.person_threshold
+        
     def database_loader(self, database_folder):
         database = {}
 
@@ -70,8 +78,8 @@ class INOUT:
         color = ((37 * idx) % 255, (17 * idx) % 255, (29 * idx) % 255)
         return color
 
-    def OUT(self, source):
-        cap = cv2.VideoCapture(source)
+    def run(self):
+        cap = cv2.VideoCapture(FLAGS.out_rtsp)
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
@@ -138,9 +146,16 @@ class INOUT:
 
                     feat = self.RECOGNITION.get(person, kps)
                     maxi = 0
-
+                    one_pass = True
+                    
                     for identity, db_feat in self.DATABASE.items():
                         similarity = self.RECOGNITION.compute_sim(feat, db_feat)
+                        if one_pass:
+                            maxi = similarity
+                            ids = identity
+                            one_pass = False
+                            continue
+                            
                         if similarity > maxi:
                             maxi = similarity
                             ids = identity
@@ -176,6 +191,8 @@ class INOUT:
             if ch == 27 or ch == ord("q") or ch == ord("Q"):
                 break
         print(FPSs/count)
+
 if __name__=="__main__":
-    action = INOUT()
-    action.OUT("sources/out.mp4")
+    FLAGS = parse_args()
+    action = OUT(FLAGS)
+    action.run()
