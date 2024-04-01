@@ -18,7 +18,7 @@ from vision import BoxAnnotator
 from vision import ColorPalette
 from vision import LineCounterAnnotator
 
-from config import parse_args
+from arguments import parse_args
 onnxruntime.set_default_logger_severity(3)
 
 class IN:
