@@ -40,7 +40,7 @@ def parse_args():
     parser.add_argument(
         "--use_cpu",
         type=bool, 
-        default=False)
+        default=True)
     
     parser.add_argument(
         "--database_folder", 
