@@ -1,39 +1,40 @@
 import argparse
 from vision import Point 
 from shapely.geometry.polygon import Polygon
+import os
 
 def parse_args():
-
+    PATH = os.getcwd()
     parser = argparse.ArgumentParser(description='Process some integers.')
     
     parser.add_argument(
         "--face_detector", 
         type=str, 
-        default='/home/foziljon/PROJECTS/ATTENDENCE_SYSTEM/models/det_500m.onnx', 
+        default=os.path.join(PATH, 'models/det_500m.onnx'), 
         help="The path of the facial detection model")
     
     parser.add_argument(
         "--face_recognizer",
         type=str, 
-        default='/home/foziljon/PROJECTS/ATTENDENCE_SYSTEM/models/w600k_mbf.onnx',
+        default=os.path.join(PATH, 'models/w600k_mbf.onnx'),
         help="The path of the facial recognition model")
 
     parser.add_argument(
         "--person_detector",
         type=str, 
-        default='/home/foziljon/PROJECTS/ATTENDENCE_SYSTEM/models/yolov8n.pt',
+        default=os.path.join(PATH, 'models/yolov8n.pt'),
         help="The path of the facial recognition model")
     
     parser.add_argument(
         "--in_rtsp",
         type=str,
-        default='sources/in.mp4',
+        default=os.path.join(PATH, 'sources/in.mp4'),
         help="video source path or rtsp protocol")
 
     parser.add_argument(
         "--out_rtsp",
         type=str,
-        default='sources/out.mp4',
+        default=os.path.join(PATH, 'sources/out.mp4'),
         help="video source path or rtsp protocol")
     
     parser.add_argument(
@@ -44,7 +45,7 @@ def parse_args():
     parser.add_argument(
         "--database_folder", 
         type=str, 
-        default="/home/foziljon/PROJECTS/ATTENDENCE_SYSTEM/dataset")
+        default=os.path.join(PATH, "dataset"))
     
     parser.add_argument(
         "--in_line_xy_min", 
