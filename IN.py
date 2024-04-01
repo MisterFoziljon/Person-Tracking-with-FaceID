@@ -77,6 +77,47 @@ class IN:
         idx = idx * 3
         color = ((37 * idx) % 255, (17 * idx) % 255, (29 * idx) % 255)
         return color
+    
+    def who_are_you(self, person):
+        faces_coords, kpss = self.DETECTOR.autodetect(person, max_num=10)
+                
+        if len(faces_coords)==0:
+            return None
+
+        first = True
+        check = 0
+        ID = "Unknown"
+                
+        for face_coords,kps in zip(faces_coords,kpss):
+
+            feat = self.RECOGNITION.get(person, kps)
+            maxi = 0
+            one_pass = True
+                    
+            for identity, db_feat in self.DATABASE.items():
+                similarity = self.RECOGNITION.compute_sim(feat, db_feat)
+                if one_pass:
+                    maxi = similarity
+                    ids = identity
+                    one_pass = False
+                    continue
+                            
+                if similarity > maxi:
+                    maxi = similarity
+                    ids = identity
+
+            if first:
+                check = face_coords[1]
+                ID = ids
+                first = False
+
+            if check>face_coords[1]:
+                check = face_coords[1]
+                ID = ids
+        
+        if maxi < 0.4:
+            return ""
+        return ID
 
     def run(self):
         cap = cv2.VideoCapture(FLAGS.in_rtsp)
@@ -89,6 +130,7 @@ class IN:
         TRACKER = BoTSORT(frame_rate=fps)
         xpmin,ypmin,xpmax,ypmax = self.IN_RECTANGLE[0][0][0],self.IN_RECTANGLE[0][0][1],self.IN_RECTANGLE[0][2][0],self.IN_RECTANGLE[0][2][1]
         count, FPSs= 0,0
+        
         while cap.isOpened():
             start = time.time()
             ret, frame = cap.read()
@@ -131,46 +173,11 @@ class IN:
                 
                 xmin,ymin,xmax,ymax = bbox
                 person = frame[ymin:ymax,xmin:xmax]
-
-                faces_coords, kpss = self.DETECTOR.autodetect(person, max_num=10)
-
-                if len(faces_coords)==0:
+        
+                if self.who_are_you(person) is None:
                     continue
-
-                first = True
-                check = 0
-                ID = "Unknown"
-                
-                for face_coords,kps in zip(faces_coords,kpss):
-
-                    feat = self.RECOGNITION.get(person, kps)
-                    maxi = 0
-                    one_pass = True
-                    for identity, db_feat in self.DATABASE.items():
-                        similarity = self.RECOGNITION.compute_sim(feat, db_feat)
-                        if one_pass:
-                            maxi = similarity
-                            ids = identity
-                            one_pass = False
-                            continue
-
-                        if similarity > maxi:
-                            maxi = similarity
-                            ids = identity
-
-                    if first:
-                        check = face_coords[1]
-                        ID = ids
-                        first = False
-
-                    if check>face_coords[1]:
-                        check = face_coords[1]
-                        ID = ids
-
-                if maxi < self.face_thresh:
-                    FACEID[tracker_id] = ""
-                else:
-                    FACEID[tracker_id] = ID
+        
+                FACEID[tracker_id] = self.who_are_you(person)
                 
             faceIDs = np.array([FACEID[ids] if FACEID[ids]!='' else 'Unknown' for ids in TRACKER_ID])
             labels = [f"#{trackerID} {faceID}" for faceID, trackerID  in zip(faceIDs,TRACKER_ID)]
