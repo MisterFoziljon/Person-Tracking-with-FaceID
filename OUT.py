@@ -136,7 +136,7 @@ class OUT:
             if not ret:
                 break
             count+=1
-            results = self.MODEL.predict(frame, conf=0.5, stream = False, device = torch.device("cpu"), verbose=False, classes=[0])
+            results = self.MODEL.predict(frame, conf=0.5, stream = False, device = self.DEVICE, verbose=False, classes=[0])
 
             xyxy=results[0].boxes.xyxy.cpu().numpy()
             confidence=results[0].boxes.conf.cpu().numpy()
