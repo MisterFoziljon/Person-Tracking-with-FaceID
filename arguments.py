@@ -88,8 +88,6 @@ def parse_args():
 
 def main():
     FLAGS = parse_args()
-    print(FLAGS.polygon)
-
 
 if __name__ == '__main__':
     main()
